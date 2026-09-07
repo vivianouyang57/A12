@@ -85,6 +85,7 @@
     .btn { border: 1px solid transparent; border-radius: 12px; padding: 10px 14px; font-weight: 750; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
     .btn-primary { color: white; background: var(--forest); }
     .btn-primary:hover { background: #084838; }
+    .btn:disabled { cursor: default; opacity: .76; }
     .btn-secondary { background: var(--paper); border-color: var(--line); color: var(--ink); }
     .btn-danger { background: #fff4f2; color: var(--red); border-color: #e8c6c2; }
     .btn-orange { background: var(--orange); color: white; }
@@ -210,7 +211,7 @@
     .selector-option:hover { border-color: var(--forest); background: var(--mint-2); }
     .admin-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(310px, .7fr); gap: 18px; }
     .expert-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(300px, .75fr); gap: 18px; align-items: start; }
-    .expert-intro { padding: 24px; background: linear-gradient(135deg, #eff6f0, #fff7ea); }
+    .expert-intro { padding: 24px; background: var(--mint-2); }
     .expert-intro h2 { font-size: 24px; margin-top: 6px; }
     .verified-badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 999px; background: #e5f0fb; color: #245b86; font-size: 11px; font-weight: 800; }
     .rank-path { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 18px; }
@@ -233,6 +234,18 @@
     .expert-fact { padding: 12px; background: var(--mint-2); border-radius: 8px; }
     .expert-fact span { display: block; color: var(--muted); font-size: 10px; margin-bottom: 3px; }
     .expert-fact strong { font-size: 14px; }
+    .community-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(290px, .65fr); gap: 18px; align-items: start; }
+    .community-feed { display: grid; gap: 14px; }
+    .community-post { padding: 20px; }
+    .post-head { display: flex; gap: 11px; align-items: center; }
+    .post-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--mint); color: var(--forest); display: grid; place-items: center; font-size: 12px; font-weight: 800; }
+    .post-meta { color: var(--muted); font-size: 12px; }
+    .post-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+    .topic-tag { color: #305d8a; background: #e6eef8; border-radius: 999px; padding: 5px 8px; font-size: 11px; font-weight: 800; }
+    .community-side { display: grid; gap: 14px; }
+    .event-card { padding: 18px; }
+    .event-row { padding: 13px 0; border-bottom: 1px solid var(--line); }
+    .event-row:last-child { border-bottom: 0; }
     .audit-list { padding: 9px; }
     .audit-row { padding: 11px; border-bottom: 1px solid var(--line); }
     .audit-row small { display: block; color: var(--muted); }
@@ -257,7 +270,7 @@
 
     @media (max-width: 1050px) {
       .app { grid-template-columns: 210px 1fr; }
-      .explore-grid, .form-layout, .admin-layout { grid-template-columns: 1fr; }
+      .explore-grid, .form-layout, .admin-layout, .expert-grid, .community-grid { grid-template-columns: 1fr; }
       .right-stack { grid-template-columns: 1fr 1fr; }
       .records-card { grid-column: 1 / -1; }
     }
@@ -289,13 +302,14 @@
     <aside class="sidebar">
       <div class="brand"><div class="brand-mark">⌁</div><div><strong>A12 Citizen Science</strong><span>Environmental Observation System</span></div></div>
       <nav class="nav" aria-label="Main navigation">
-        <button class="nav-btn active" data-view="explore" data-roles="guest,participant,moderator,admin"><span class="icon">⌖</span>Public Map</button>
-        <button class="nav-btn" data-view="dashboard" data-roles="guest,participant,moderator,admin"><span class="icon">▥</span>Data Dashboard</button>
-        <button class="nav-btn" data-view="experts" data-roles="guest,participant,moderator,admin"><span class="icon">✦</span>Expert Hub</button>
-        <button class="nav-btn" data-view="submit" data-roles="participant"><span class="icon">＋</span>Submit observation</button>
-        <button class="nav-btn" data-view="mine" data-roles="participant"><span class="icon">▤</span>My Records</button>
-        <button class="nav-btn" data-view="review" data-roles="moderator"><span class="icon">✓</span>Moderator Workspace</button>
-        <button class="nav-btn" data-view="admin" data-roles="admin"><span class="icon">⚙</span>Admin Workspace</button>
+        <button class="nav-btn active" data-view="explore" data-roles="guest,participant,moderator"><span class="icon">⌖</span>Public Map</button>
+        <button class="nav-btn" data-view="dashboard" data-roles="guest,participant,moderator"><span class="icon">▥</span>Data Dashboard</button>
+        <button class="nav-btn" data-view="community" data-roles="guest,participant,moderator"><span class="icon">#</span>Community</button>
+        <button class="nav-btn" data-view="experts" data-roles="guest,participant,moderator"><span class="icon">✦</span>Expert Hub</button>
+        <button class="nav-btn" data-view="submit" data-roles="participant,moderator"><span class="icon">＋</span>Submit observation</button>
+        <button class="nav-btn" data-view="mine" data-roles="participant,moderator"><span class="icon">▤</span>My Records</button>
+        <button class="nav-btn" data-view="review" data-roles="moderator"><span class="icon">✓</span>Expert Review Queue</button>
+        <button class="nav-btn" data-view="admin" data-roles="admin"><span class="icon">⚙</span>Admin Console</button>
       </nav>
       <div class="side-note"><strong>Responsive web prototype</strong>ALA BioCollect workflow with iNaturalist-style public privacy controls. Walking SA informs Region and Park categories.</div>
     </aside>
@@ -304,7 +318,7 @@
       <header class="topbar">
         <div><div class="crumb">A12 Citizen Science Prototype</div><strong id="top-title">Explore approved observations</strong></div>
         <div class="top-actions">
-          <div class="role-switch" aria-label="Switch prototype role"><button class="role-btn active" data-role="guest">Guest</button><button class="role-btn" data-role="participant">Participant</button><button class="role-btn" data-role="moderator">Moderator</button><button class="role-btn" data-role="admin">Admin</button></div>
+          <div class="role-switch" aria-label="Switch prototype role"><button class="role-btn active" data-role="guest">Guest</button><button class="role-btn" data-role="participant">Participant</button><button class="role-btn" data-role="moderator">Verified Expert</button><button class="role-btn" data-role="admin">Admin</button></div>
           <button class="btn btn-secondary" id="header-signin" data-view="signin">Sign in</button>
           <button class="btn btn-primary" id="header-create" data-view="signin" data-auth-target="create">Create account</button>
           <div class="avatar" id="avatar" aria-label="Current profile">GU</div>
@@ -368,6 +382,11 @@
           </div><p class="policy-note" style="margin-top:16px">Export includes approved public fields only. Restricted locations are excluded.</p>
         </section>
 
+        <section class="view" id="view-community">
+          <div class="page-head"><div><div class="eyebrow">Local action</div><h1>Community</h1><p class="sub">Share local activity, ask questions and join field events. Verified Experts are clearly identified in discussion.</p></div><button class="btn btn-primary" id="open-community-post">Start a post</button></div>
+          <div class="community-grid"><div class="community-feed" id="community-feed"><article class="card community-post"><div class="post-head"><div class="post-avatar">AM</div><div><div class="leader-name"><strong>Dr Anna Morgan</strong><span class="verified-badge">✓ Verified Expert</span></div><div class="post-meta">Avian ecology · 2 hours ago</div></div></div><p>Morning survey update: superb fairy-wrens were active along the southern Belair trail. Please keep a respectful distance from nesting habitat.</p><div class="post-tags"><span class="topic-tag">#Birdwatching</span><span class="topic-tag">#BelairNationalPark</span></div></article><article class="card community-post"><div class="post-head"><div class="post-avatar">JH</div><div><strong>Jordan Hayes</strong><div class="post-meta">Participant · Yesterday</div></div></div><p>Who is joining the creek clean-up this Saturday? I will bring gloves and a field guide for plants around the reserve.</p><div class="post-tags"><span class="topic-tag">#CreekCleanUp</span><span class="topic-tag">#CommunityAction</span></div></article></div><aside class="community-side"><article class="card event-card"><h2>Upcoming activities</h2><div class="event-row"><strong>Belair bird survey</strong><small class="post-meta">14 Sep · 8:00 am</small><button class="btn btn-secondary" data-join-activity="Belair bird survey" style="margin-top:10px">Join activity</button></div><div class="event-row"><strong>Brown Hill Creek clean-up</strong><small class="post-meta">21 Sep · 9:30 am</small><button class="btn btn-secondary" data-join-activity="Brown Hill Creek clean-up" style="margin-top:10px">Join activity</button></div></article><article class="card event-card"><h2>Community guidance</h2><p class="sub">Posts can inspire local action. Observations still need the structured submission and review workflow before appearing as approved data.</p></article></aside></div>
+        </section>
+
         <section class="view" id="view-experts">
           <div class="page-head"><div><div class="eyebrow">Community recognition</div><h1>Expert Hub</h1><p class="sub">Verified Experts are researchers and qualified environmental professionals approved by an A12 Admin. Rankings are based on verified records.</p></div><button class="btn btn-primary" id="open-expert-application">Apply for Verified Expert</button></div>
           <div class="expert-grid">
@@ -417,7 +436,7 @@
         </section>
 
         <section class="view" id="view-review">
-          <div class="page-head"><div><span class="staff-label">Private staff view</span><div class="eyebrow">Moderator Workspace</div><h1>Review queue</h1><p class="sub">Check original evidence and exact locations, then record a reasoned decision.</p></div><span class="tag pending" id="queue-count">3 waiting</span></div>
+          <div class="page-head"><div><span class="staff-label">Verified Expert only</span><div class="eyebrow">Expert Review Queue</div><h1>Review queue</h1><p class="sub">Check original evidence and exact locations, then record a reasoned decision.</p></div><span class="tag pending" id="queue-count">3 waiting</span></div>
           <div class="review-layout">
             <article class="card queue" id="review-queue"></article>
             <article class="card review-card">
@@ -439,7 +458,7 @@
         </section>
 
         <section class="view" id="view-admin">
-          <div class="page-head"><div><span class="staff-label">Private administration</span><div class="eyebrow">Admin Workspace</div><h1>Accounts and access</h1><p class="sub">Admin manages roles and access. Moderator manages observation review.</p></div></div>
+          <div class="page-head"><div><span class="staff-label">Private administration</span><div class="eyebrow">Admin Console</div><h1>Accounts and access</h1><p class="sub">Admin manages roles, expert verification and audit history. Verified Experts review observations in the Citizen App.</p></div></div>
           <div class="admin-layout"><article class="card table-card"><div class="panel-head"><h2>User accounts</h2><span class="tag">Least privilege</span></div><table><thead><tr><th>User</th><th>Email</th><th>Role</th><th>Access</th></tr></thead><tbody id="admin-users"><tr><td>Anna Morgan</td><td>anna.morgan@example.org</td><td><select class="select user-role"><option>Participant</option><option>Moderator</option><option selected>Admin</option></select></td><td><span class="tag">Active</span></td></tr><tr><td>Sofia Bennett</td><td>sofia.bennett@example.org</td><td><select class="select user-role"><option selected>Participant</option><option>Moderator</option><option>Admin</option></select></td><td><span class="tag">Active</span></td></tr><tr><td>Lucas Green</td><td>lucas.green@example.org</td><td><select class="select user-role"><option>Participant</option><option selected>Moderator</option><option>Admin</option></select></td><td><span class="tag">Active</span></td></tr></tbody></table></article><article class="card"><div class="panel-head"><h2>Audit log</h2><span class="tag">Recorded</span></div><div class="audit-list" id="audit-list"><div class="audit-row"><strong>Admin role assigned</strong><small>System owner · 5 Sep 2026</small></div><div class="audit-row"><strong>Observation approved with protected location</strong><small>Lucas Green · 4 Sep 2026</small></div><div class="audit-row"><strong>Participant account created</strong><small>System · 4 Sep 2026</small></div></div></article></div>
           <article class="card table-card" style="margin-top:18px"><div class="panel-head"><div><h2>Expert verification applications</h2><p class="sub" style="margin:5px 0 0">Admin verifies professional identity before the badge is issued.</p></div><span class="tag pending" id="expert-application-count">1 pending</span></div><table><thead><tr><th>Applicant</th><th>Affiliation</th><th>Expertise</th><th>Professional profile</th><th>Decision</th></tr></thead><tbody id="expert-applications"><tr><td>Jamie Wilson</td><td>Adelaide Botanic Garden</td><td>Native plants</td><td><span class="tag">Profile supplied</span></td><td><button class="btn btn-primary" data-verify-expert="Jamie Wilson">Approve + Verified Expert</button></td></tr></tbody></table></article>
         </section>
@@ -448,12 +467,13 @@
   </div>
 
   <nav class="mobile-nav" aria-label="Mobile navigation">
-    <button class="nav-btn active" data-view="explore" data-roles="guest,participant,moderator,admin"><span class="icon">⌖</span>Map</button><button class="nav-btn" data-view="dashboard" data-roles="guest,participant,moderator,admin"><span class="icon">▥</span>Data</button><button class="nav-btn" data-view="experts" data-roles="guest,participant,moderator,admin"><span class="icon">✦</span>Experts</button><button class="nav-btn" data-view="submit" data-roles="participant"><span class="icon">＋</span>Submit</button><button class="nav-btn" data-view="mine" data-roles="participant"><span class="icon">▤</span>Mine</button><button class="nav-btn" data-view="review" data-roles="moderator"><span class="icon">✓</span>Review</button><button class="nav-btn" data-view="admin" data-roles="admin"><span class="icon">⚙</span>Admin</button>
+    <button class="nav-btn active" data-view="explore" data-roles="guest,participant,moderator"><span class="icon">⌖</span>Map</button><button class="nav-btn" data-view="dashboard" data-roles="guest,participant,moderator"><span class="icon">▥</span>Data</button><button class="nav-btn" data-view="community" data-roles="guest,participant,moderator"><span class="icon">#</span>Community</button><button class="nav-btn" data-view="experts" data-roles="guest,participant,moderator"><span class="icon">✦</span>Experts</button><button class="nav-btn" data-view="submit" data-roles="participant,moderator"><span class="icon">＋</span>Submit</button><button class="nav-btn" data-view="mine" data-roles="participant,moderator"><span class="icon">▤</span>Mine</button><button class="nav-btn" data-view="review" data-roles="moderator"><span class="icon">✓</span>Review</button><button class="nav-btn" data-view="admin" data-roles="admin"><span class="icon">⚙</span>Admin</button>
   </nav>
 
   <div class="modal" id="detail-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><article class="modal-card"><div class="modal-media" id="modal-emoji">SF</div><div class="modal-content"><div class="modal-top"><div><span class="tag">Approved</span><h2 id="modal-title" style="margin-top:8px">Superb fairy-wren</h2></div><button class="close" id="modal-close" aria-label="Close">×</button></div><p id="modal-description"></p><div class="detail-grid"><div class="detail"><span>Category</span><strong id="modal-category"></strong></div><div class="detail"><span>Observed</span><strong id="modal-date"></strong></div><div class="detail"><span>Public location</span><strong id="modal-location"></strong></div></div><div class="privacy-banner"><span>◉</span><div><strong>Approximate region only</strong><div>Location withheld to protect a sensitive species. Exact coordinates and private submitter data are not shown.</div></div></div><button class="btn btn-secondary" id="back-to-map">← Back to public map</button></div></article></div>
   <div class="modal" id="reply-modal" role="dialog" aria-modal="true"><article class="modal-card"><div class="modal-content"><div class="modal-top"><div><span class="tag info">Needs information</span><h2 style="margin-top:8px">Reply to Moderator</h2></div><button class="close" id="reply-close" aria-label="Close">×</button></div><p class="policy-note">Please confirm whether the plant was inside the reserve boundary and add any identifying details.</p><div class="field" style="margin-top:14px"><label for="reply-text">Your response</label><textarea class="input" id="reply-text" placeholder="Add the requested information"></textarea></div><div class="form-actions"><button class="btn btn-primary" id="send-reply">Send response</button></div></div></article></div>
   <div class="modal" id="expert-application-modal" role="dialog" aria-modal="true" aria-labelledby="expert-application-title"><article class="modal-card"><div class="modal-content"><div class="modal-top"><div><span class="verified-badge">✓ Verified Expert</span><h2 id="expert-application-title" style="margin-top:8px">Apply for expert verification</h2></div><button class="close" id="expert-application-close" aria-label="Close">×</button></div><p class="sub">This role is for researchers and qualified environmental professionals. An Admin reviews professional identity and expertise before enabling review access.</p><form id="expert-application-form"><div class="field" style="margin-top:14px"><label for="expert-affiliation">Professional affiliation</label><input class="input" id="expert-affiliation" placeholder="University, museum, government agency or conservation organisation" required /></div><div class="field" style="margin-top:14px"><label for="expertise-area">Area of expertise</label><input class="input" id="expertise-area" placeholder="For example: Birds, native plants or water quality" required /></div><div class="field" style="margin-top:14px"><label for="expert-profile-link">Professional profile link</label><input class="input" id="expert-profile-link" type="url" placeholder="Institution profile, ORCID or professional portfolio" required /></div><div class="form-actions"><button type="submit" class="btn btn-primary">Submit application</button></div></form></div></article></div>
+  <div class="modal" id="community-post-modal" role="dialog" aria-modal="true" aria-labelledby="community-post-title"><article class="modal-card"><div class="modal-content"><div class="modal-top"><div><div class="eyebrow">Community</div><h2 id="community-post-title">Start a post</h2></div><button class="close" id="community-post-close" aria-label="Close">×</button></div><form id="community-post-form"><div class="field" style="margin-top:14px"><label for="community-post-copy">What would you like to share?</label><textarea class="input" id="community-post-copy" placeholder="Share an event, question or field update" required></textarea></div><div class="field" style="margin-top:14px"><label for="community-post-tags">Topics</label><input class="input" id="community-post-tags" value="#CommunityAction" required /></div><div class="form-actions"><button type="submit" class="btn btn-primary">Publish post</button></div></form></div></article></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
@@ -482,16 +502,16 @@
       {name:'Dr Evan Cole',initials:'EC',expertise:'Urban biodiversity',records:12}
     ];
     let currentReview=0,currentRole='guest',selectedPark='All parks and areas',photoValid=false;
-    const titles={explore:'Explore approved observations',dashboard:'Public Data Dashboard',experts:'Expert Hub',park:'Park / area selector',signin:'Role Access',submit:'Submit an observation',mine:'My Records',review:'Moderator Workspace — Private staff view',admin:'Admin Workspace'};
+    const titles={explore:'Explore approved observations',dashboard:'Public Data Dashboard',community:'Community',experts:'Expert Hub',park:'Park / area selector',signin:'Role Access',submit:'Submit an observation',mine:'My Records',review:'Expert Review Queue — Verified Expert Only',admin:'Admin Console'};
     const home={guest:'explore',participant:'mine',moderator:'review',admin:'admin'};
     const showToast=message=>{const t=document.getElementById('toast');t.textContent=message;t.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove('show'),2600)};
-    function canAccess(name){if(['explore','dashboard','experts','park','signin'].includes(name))return true;if(['submit','mine'].includes(name))return currentRole==='participant';if(name==='review')return currentRole==='moderator';if(name==='admin')return currentRole==='admin';return false}
+    function canAccess(name){if(name==='signin')return true;if(['explore','dashboard','community','experts','park'].includes(name))return currentRole!=='admin';if(['submit','mine'].includes(name))return ['participant','moderator'].includes(currentRole);if(name==='review')return currentRole==='moderator';if(name==='admin')return currentRole==='admin';return false}
     function showView(name,authTarget){if(!canAccess(name)){showView(currentRole==='guest'?'signin':home[currentRole]);showToast(currentRole==='guest'?'Sign in as a Participant to continue.':'This role cannot access that workspace.');return}document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${name}`));document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===name));document.getElementById('top-title').textContent=titles[name];if(name==='signin'&&authTarget)setAuth(authTarget);window.scrollTo({top:0,behavior:'smooth'})}
-    function setRole(role,announce=true){currentRole=role;document.querySelectorAll('.role-btn').forEach(b=>b.classList.toggle('active',b.dataset.role===role));document.querySelectorAll('[data-roles]').forEach(el=>el.style.display=el.dataset.roles.split(',').includes(role)?'':'none');const mobileNav=document.querySelector('.mobile-nav'),visibleMobileItems=[...mobileNav.querySelectorAll('.nav-btn')].filter(button=>button.dataset.roles.split(',').includes(role)).length;mobileNav.style.gridTemplateColumns=`repeat(${visibleMobileItems}, 1fr)`;const guest=role==='guest';document.getElementById('header-signin').style.display=guest?'inline-flex':'none';document.getElementById('header-create').style.display=guest?'inline-flex':'none';document.getElementById('avatar').textContent=role==='participant'?'PA':role==='moderator'?'MO':role==='admin'?'AD':'GU';showView(home[role]);if(announce)showToast(`${role[0].toUpperCase()+role.slice(1)} view is active.`)}
+    function setRole(role,announce=true){currentRole=role;document.querySelectorAll('.role-btn').forEach(b=>b.classList.toggle('active',b.dataset.role===role));document.querySelectorAll('[data-roles]').forEach(el=>el.style.display=el.dataset.roles.split(',').includes(role)?'':'none');const mobileNav=document.querySelector('.mobile-nav'),visibleMobileItems=[...mobileNav.querySelectorAll('.nav-btn')].filter(button=>button.dataset.roles.split(',').includes(role)).length;mobileNav.style.gridTemplateColumns=`repeat(${visibleMobileItems}, 1fr)`;const guest=role==='guest',isExpert=role==='moderator';document.querySelector('.crumb').textContent=role==='admin'?'A12 Admin Console':'A12 Citizen Science';document.querySelector('.side-note strong').textContent=role==='admin'?'Private Admin Console':'Citizen App';document.getElementById('header-signin').style.display=guest?'inline-flex':'none';document.getElementById('header-create').style.display=guest?'inline-flex':'none';document.getElementById('avatar').textContent=role==='participant'?'PA':isExpert?'VE':role==='admin'?'AD':'GU';document.getElementById('open-expert-application').textContent=isExpert?'✓ Verified Expert':'Apply for Verified Expert';document.getElementById('open-expert-application').disabled=isExpert;showView(home[role]);if(announce)showToast(`${role==='moderator'?'Verified Expert':role[0].toUpperCase()+role.slice(1)} view is active.`)}
     document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view,b.dataset.authTarget)));
     document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.go)));
     document.querySelectorAll('.role-btn').forEach(b=>b.addEventListener('click',()=>setRole(b.dataset.role)));
-    document.getElementById('public-submit').onclick=()=>currentRole==='participant'?showView('submit'):showView('signin','create');
+    document.getElementById('public-submit').onclick=()=>['participant','moderator'].includes(currentRole)?showView('submit'):showView('signin','create');
 
     function setAuth(target){document.querySelectorAll('[data-auth]').forEach(b=>b.classList.toggle('active',b.dataset.auth===target));document.querySelectorAll('[data-auth-pane]').forEach(p=>p.classList.toggle('active',p.dataset.authPane===target))}
     document.querySelectorAll('[data-auth]').forEach(b=>b.onclick=()=>setAuth(b.dataset.auth));
@@ -504,6 +524,11 @@
     function bindExpertVerificationButtons(){document.querySelectorAll('[data-verify-expert]').forEach(button=>button.onclick=()=>verifyExpert(button))}
     document.getElementById('expert-application-form').onsubmit=e=>{e.preventDefault();e.currentTarget.reset();document.getElementById('expert-application-modal').classList.remove('open');document.getElementById('expert-applications').insertAdjacentHTML('afterbegin','<tr><td>Jordan Hayes</td><td>Application supplied</td><td>Environmental science</td><td><span class="tag">Profile supplied</span></td><td><button class="btn btn-primary" data-verify-expert="Jordan Hayes">Approve + Verified Expert</button></td></tr>');document.getElementById('expert-application-count').textContent='2 pending';bindExpertVerificationButtons();showToast('Expert application sent to Admin for verification.')};
     bindExpertVerificationButtons();
+    document.getElementById('open-community-post').onclick=()=>{if(currentRole==='guest'){showView('signin','create');showToast('Create a Participant account before publishing a community post.');return}document.getElementById('community-post-modal').classList.add('open')};
+    document.getElementById('community-post-close').onclick=()=>document.getElementById('community-post-modal').classList.remove('open');
+    document.getElementById('community-post-modal').onclick=e=>{if(e.target.id==='community-post-modal')e.currentTarget.classList.remove('open')};
+    document.getElementById('community-post-form').onsubmit=e=>{e.preventDefault();const copy=document.getElementById('community-post-copy').value.trim(),tags=document.getElementById('community-post-tags').value.trim().split(/\s+/).filter(Boolean),expert=currentRole==='moderator';document.getElementById('community-feed').insertAdjacentHTML('afterbegin',`<article class="card community-post"><div class="post-head"><div class="post-avatar">${expert?'AM':'JH'}</div><div><div class="leader-name"><strong>${expert?'Dr Anna Morgan':'Jordan Hayes'}</strong>${expert?'<span class="verified-badge">✓ Verified Expert</span>':''}</div><div class="post-meta">${expert?'Avian ecology':'Participant'} · Just now</div></div></div><p>${copy}</p><div class="post-tags">${tags.map(tag=>`<span class="topic-tag">${tag}</span>`).join('')}</div></article>`);e.currentTarget.reset();document.getElementById('community-post-modal').classList.remove('open');showToast('Community post published.')};
+    document.querySelectorAll('[data-join-activity]').forEach(button=>button.onclick=()=>{if(currentRole==='guest'){showView('signin','create');showToast('Create a Participant account to join an activity.');return}showToast(`Joined ${button.dataset.joinActivity}.`)});
 
     document.getElementById('park-selector-btn').onclick=()=>showView('park');document.getElementById('park-close').onclick=()=>showView('explore');
     document.querySelectorAll('[data-park]').forEach(b=>b.onclick=()=>{selectedPark=b.dataset.park;document.getElementById('park-selector-btn').textContent=selectedPark+' ▾';document.getElementById('dashboard-park').textContent=selectedPark;showView('explore');showToast('Park / area selection applied to the demonstration.')});
