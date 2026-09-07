@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0d5b47" />
+  <title>A12 Citizen Science | Environmental Observations</title>
+  <meta name="description" content="A clickable prototype for submitting, reviewing and sharing privacy-aware environmental observations." />
+  <style>
+    :root {
+      --forest: #0d5b47;
+      --forest-2: #174f41;
+      --mint: #dcece4;
+      --mint-2: #eef6f1;
+      --cream: #f7f6ef;
+      --paper: #fffefa;
+      --ink: #18332c;
+      --muted: #61736d;
+      --line: #d8e1dc;
+      --orange: #c86c18;
+      --orange-soft: #f7e8d7;
+      --red: #a53b35;
+      --shadow: 0 16px 45px rgba(21, 63, 51, .11);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; display: grid; grid-template-columns: 250px 1fr; }
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; padding: 26px 18px;
+      background: var(--forest-2); color: white; display: flex; flex-direction: column; gap: 26px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; padding: 0 8px; }
+    .brand-mark {
+      width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center;
+      background: #f0b65c; color: #173d32; font-size: 22px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.35);
+    }
+    .brand strong { display: block; font-size: 18px; letter-spacing: 0; }
+    .brand span { display: block; font-size: 11px; color: #c8dcd4; margin-top: 2px; }
+    .nav { display: grid; gap: 7px; }
+    .nav-btn {
+      border: 0; background: transparent; color: #d5e5df; text-align: left;
+      padding: 12px 14px; border-radius: 12px; display: flex; gap: 11px; align-items: center;
+    }
+    .nav-btn:hover, .nav-btn.active { color: white; background: rgba(255,255,255,.12); }
+    .nav-btn .icon { width: 22px; text-align: center; }
+    .side-note { margin-top: auto; padding: 15px; border-radius: 14px; background: rgba(255,255,255,.09); color: #d7e4df; font-size: 12px; }
+    .side-note strong { display: block; color: white; margin-bottom: 5px; }
+
+    .shell { min-width: 0; }
+    .topbar {
+      height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 18px;
+      padding: 0 32px; background: rgba(247,246,239,.9); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 20;
+    }
+    .crumb { font-size: 13px; color: var(--muted); }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .role-switch {
+      display: flex; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper);
+    }
+    .role-btn { border: 0; background: transparent; padding: 7px 11px; border-radius: 9px; color: var(--muted); font-size: 13px; }
+    .role-btn.active { color: white; background: var(--forest); }
+    .avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--orange-soft); color: var(--orange); font-weight: 800; }
+
+    main { padding: 30px 32px 72px; max-width: 1500px; margin: 0 auto; }
+    .view { display: none; animation: appear .25s ease; }
+    .view.active { display: block; }
+    @keyframes appear { from { opacity: .25; transform: translateY(5px); } }
+    .page-head { display: flex; justify-content: space-between; gap: 20px; align-items: flex-end; margin-bottom: 22px; }
+    h1 { margin: 0; font-size: 32px; line-height: 1.12; letter-spacing: 0; }
+    h2 { margin: 0; font-size: 20px; letter-spacing: 0; }
+    h3 { margin: 0; font-size: 16px; }
+    .eyebrow { color: var(--orange); font-size: 12px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; margin-bottom: 8px; }
+    .sub { color: var(--muted); max-width: 720px; margin: 9px 0 0; }
+    .btn { border: 1px solid transparent; border-radius: 12px; padding: 10px 14px; font-weight: 750; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-primary { color: white; background: var(--forest); }
+    .btn-primary:hover { background: #084838; }
+    .btn-secondary { background: var(--paper); border-color: var(--line); color: var(--ink); }
+    .btn-danger { background: #fff4f2; color: var(--red); border-color: #e8c6c2; }
+    .btn-orange { background: var(--orange); color: white; }
+    .btn:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid rgba(200,108,24,.3); outline-offset: 2px; }
+    .card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 1px 0 rgba(24,51,44,.03); }
+
+    .explore-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(310px, .75fr); gap: 20px; }
+    .map-card { overflow: hidden; min-height: 630px; display: grid; grid-template-rows: auto 1fr; }
+    .filterbar { padding: 15px; border-bottom: 1px solid var(--line); display: flex; gap: 10px; flex-wrap: wrap; }
+    .select, .input { border: 1px solid var(--line); background: white; border-radius: 10px; padding: 9px 11px; color: var(--ink); }
+    .select { min-width: 135px; }
+    .map {
+      position: relative; min-height: 540px; overflow: hidden;
+      background-color: #dfe9df;
+      background-image:
+        linear-gradient(35deg, transparent 46%, rgba(255,255,255,.75) 47%, rgba(255,255,255,.75) 51%, transparent 52%),
+        linear-gradient(125deg, transparent 47%, rgba(255,255,255,.55) 48%, rgba(255,255,255,.55) 50%, transparent 51%),
+        radial-gradient(circle at 75% 30%, #bfd8c3 0 8%, transparent 8.5%),
+        radial-gradient(circle at 28% 70%, #c9dec4 0 12%, transparent 12.5%);
+      background-size: 180px 180px, 230px 230px, 100% 100%, 100% 100%;
+    }
+    .map::before, .map::after { content: ""; position: absolute; background: rgba(150,191,212,.65); border-radius: 50%; filter: blur(1px); }
+    .map::before { width: 290px; height: 70px; left: -40px; top: 90px; transform: rotate(-24deg); }
+    .map::after { width: 380px; height: 56px; right: -90px; bottom: 80px; transform: rotate(20deg); }
+    .map-label { position: absolute; color: #6e8379; font-size: 12px; font-weight: 700; letter-spacing: .04em; }
+    .marker { position: absolute; z-index: 3; width: 38px; height: 38px; border: 0; border-radius: 50% 50% 50% 8px; transform: rotate(-45deg); background: var(--forest); color: white; box-shadow: 0 6px 14px rgba(13,91,71,.25); }
+    .marker span { display: block; transform: rotate(45deg); font-size: 17px; }
+    .marker:hover, .marker.selected { scale: 1.12; background: var(--orange); }
+    .map-note { position: absolute; z-index: 4; bottom: 16px; left: 16px; right: 16px; padding: 12px 14px; border-radius: 13px; background: rgba(255,254,250,.94); border: 1px solid rgba(255,255,255,.8); display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+    .map-note strong { color: var(--ink); }
+
+    .right-stack { display: grid; gap: 16px; align-content: start; }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat { padding: 17px; }
+    .stat b { display: block; font-size: 26px; letter-spacing: -.03em; }
+    .stat span { color: var(--muted); font-size: 12px; }
+    .panel-head { padding: 18px 18px 0; display: flex; justify-content: space-between; align-items: center; }
+    .records { padding: 10px; display: grid; gap: 7px; }
+    .record-row { width: 100%; border: 0; background: transparent; border-radius: 12px; text-align: left; padding: 10px; display: grid; grid-template-columns: 48px 1fr auto; gap: 11px; align-items: center; }
+    .record-row:hover { background: var(--mint-2); }
+    .thumb { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; font-size: 25px; background: var(--mint); }
+    .record-row strong { display: block; font-size: 14px; }
+    .record-row small { color: var(--muted); }
+    .tag { font-size: 11px; font-weight: 800; padding: 5px 8px; border-radius: 999px; background: var(--mint); color: var(--forest); white-space: nowrap; }
+    .tag.pending { background: #fff0cc; color: #875800; }
+    .tag.info { background: #e6eef8; color: #305d8a; }
+    .tag.rejected { background: #f7dedb; color: var(--red); }
+    .mini-chart { height: 120px; padding: 18px; display: flex; align-items: flex-end; gap: 12px; }
+    .bar { flex: 1; min-width: 16px; border-radius: 8px 8px 3px 3px; background: var(--mint); position: relative; }
+    .bar:nth-child(2n) { background: #86b6a3; }
+    .bar::after { content: attr(data-label); position: absolute; left: 50%; bottom: -20px; transform: translateX(-50%); color: var(--muted); font-size: 10px; }
+
+    .form-layout { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 20px; align-items: start; }
+    .form-card { padding: 24px; }
+    .steps { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }
+    .step-pill { padding: 7px 11px; border-radius: 999px; background: #edf2ef; color: var(--muted); font-size: 12px; font-weight: 700; }
+    .step-pill.active { background: var(--forest); color: white; }
+    .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 17px; }
+    .field { display: grid; gap: 7px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { font-size: 13px; font-weight: 800; }
+    .field small { color: var(--muted); }
+    textarea.input { resize: vertical; min-height: 105px; }
+    .upload {
+      border: 1.5px dashed #9bb6aa; border-radius: 16px; min-height: 170px; display: grid; place-items: center;
+      text-align: center; padding: 20px; background: var(--mint-2); position: relative; overflow: hidden;
+    }
+    .upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .upload-preview { width: 100%; height: 185px; object-fit: cover; display: none; border-radius: 12px; }
+    .check-row { display: flex; gap: 10px; align-items: flex-start; padding: 13px; border: 1px solid var(--line); border-radius: 12px; }
+    .check-row input { margin-top: 4px; accent-color: var(--forest); }
+    .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+    .help-card { padding: 20px; }
+    .help-list { display: grid; gap: 15px; margin-top: 16px; }
+    .help-item { display: grid; grid-template-columns: 32px 1fr; gap: 10px; }
+    .help-item .dot { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; background: var(--mint); color: var(--forest); font-weight: 900; }
+    .ai-box { margin-top: 18px; padding: 16px; border-radius: 14px; background: var(--orange-soft); border: 1px solid #ead0ae; }
+    .ai-box small { color: #79583a; }
+
+    .table-card { overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 15px 17px; border-bottom: 1px solid var(--line); font-size: 13px; }
+    th { color: var(--muted); background: #f1f5f2; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+    tr:last-child td { border-bottom: 0; }
+    .table-title { display: flex; align-items: center; gap: 12px; }
+
+    .review-layout { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 20px; }
+    .queue { padding: 10px; }
+    .queue-item { width: 100%; border: 1px solid transparent; background: transparent; padding: 13px; border-radius: 13px; text-align: left; display: grid; grid-template-columns: 50px 1fr; gap: 12px; }
+    .queue-item:hover, .queue-item.active { background: var(--mint-2); border-color: #bad2c7; }
+    .review-card { overflow: hidden; }
+    .review-cover { height: 230px; background: linear-gradient(150deg, #9bc0a2, #47735c); display: grid; place-items: center; font-size: 94px; }
+    .review-body { padding: 22px; }
+    .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 18px 0; }
+    .detail { padding: 12px; background: var(--mint-2); border-radius: 12px; }
+    .detail span { display: block; font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+    .privacy-banner { display: flex; gap: 11px; padding: 14px; border-radius: 13px; background: #fff0e1; border: 1px solid #efd0a7; margin: 15px 0; }
+    .review-actions { display: flex; flex-wrap: wrap; gap: 9px; border-top: 1px solid var(--line); padding-top: 18px; }
+
+    .staff-label { display: inline-flex; margin-bottom: 8px; padding: 5px 8px; border-radius: 6px; background: #f2eafa; color: #694c80; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+    .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .metric { padding: 19px; }
+    .metric b { display: block; margin-top: 4px; font-size: 28px; }
+    .chart-card { padding: 20px; min-height: 280px; }
+    .chart-card.wide { grid-column: span 2; }
+    .category-chart, .trend-chart { height: 190px; display: flex; align-items: flex-end; gap: 12px; padding-top: 22px; }
+    .chart-column { flex: 1; display: grid; align-items: end; height: 100%; gap: 7px; text-align: center; color: var(--muted); font-size: 11px; }
+    .chart-column i { display: block; min-height: 8px; border-radius: 6px 6px 2px 2px; background: var(--forest); }
+    .chart-column:nth-child(2) i { background: #d28a39; }
+    .chart-column:nth-child(3) i { background: #43879a; }
+    .chart-column:nth-child(4) i { background: #af554e; }
+    .auth-wrap { min-height: 68vh; display: grid; place-items: center; }
+    .auth-card { width: min(470px, 100%); padding: 24px; }
+    .auth-tabs { display: flex; gap: 4px; margin: 18px 0; border-bottom: 1px solid var(--line); }
+    .auth-tab { border: 0; background: transparent; padding: 10px 12px; color: var(--muted); border-bottom: 2px solid transparent; }
+    .auth-tab.active { color: var(--forest); border-color: var(--forest); font-weight: 800; }
+    .auth-pane { display: none; }
+    .auth-pane.active { display: block; }
+    .auth-pane .field { margin: 13px 0; }
+    .policy-note { padding: 13px; border-left: 3px solid var(--forest); background: var(--mint-2); color: var(--muted); font-size: 12px; }
+    .selector-list { display: grid; gap: 8px; margin-top: 18px; }
+    .selector-option { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: white; text-align: left; }
+    .selector-option:hover { border-color: var(--forest); background: var(--mint-2); }
+    .admin-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(310px, .7fr); gap: 18px; }
+    .audit-list { padding: 9px; }
+    .audit-row { padding: 11px; border-bottom: 1px solid var(--line); }
+    .audit-row small { display: block; color: var(--muted); }
+    .decision-note { margin: 15px 0; }
+    .flow-panel { display: none; margin-top: 16px; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: #fbfcfa; }
+    .flow-panel.open { display: block; }
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+    .compare-item { padding: 12px; border: 1px solid var(--line); border-radius: 8px; }
+    .upload-error { display: none; padding: 12px; border: 1px solid #e7bbb6; border-radius: 8px; background: #fff0ee; color: var(--red); }
+    .upload-error.open { display: block; }
+
+    .modal { position: fixed; inset: 0; display: none; place-items: center; background: rgba(9,29,23,.55); padding: 20px; z-index: 80; }
+    .modal.open { display: grid; }
+    .modal-card { width: min(560px, 100%); max-height: 88vh; overflow: auto; background: var(--paper); border-radius: 22px; box-shadow: var(--shadow); }
+    .modal-media { height: 210px; background: linear-gradient(145deg, #c9e0d0, #729a7f); display: grid; place-items: center; font-size: 88px; }
+    .modal-content { padding: 23px; }
+    .modal-top { display: flex; align-items: start; justify-content: space-between; gap: 14px; }
+    .close { border: 0; background: #edf2ef; width: 34px; height: 34px; border-radius: 50%; }
+    .toast { position: fixed; right: 24px; bottom: 24px; z-index: 100; background: #173d32; color: white; padding: 13px 16px; border-radius: 12px; box-shadow: var(--shadow); transform: translateY(120px); opacity: 0; transition: .25s ease; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .mobile-nav { display: none; }
+
+    @media (max-width: 1050px) {
+      .app { grid-template-columns: 210px 1fr; }
+      .explore-grid, .form-layout, .admin-layout { grid-template-columns: 1fr; }
+      .right-stack { grid-template-columns: 1fr 1fr; }
+      .records-card { grid-column: 1 / -1; }
+    }
+    @media (max-width: 760px) {
+      .app { display: block; }
+      .sidebar { display: none; }
+      .topbar { height: 65px; padding: 0 16px; }
+      .crumb { display: none; }
+      .role-switch .role-btn { padding: 6px 8px; font-size: 11px; }
+      main { padding: 22px 15px 88px; }
+      .page-head { align-items: flex-start; flex-direction: column; }
+      h1 { font-size: 27px; }
+      .page-head .btn { width: 100%; }
+      .map-card { min-height: 520px; }
+      .map { min-height: 440px; }
+      .right-stack, .field-grid, .review-layout, .dashboard-grid { grid-template-columns: 1fr; }
+      .chart-card.wide { grid-column: auto; }
+      .compare-grid { grid-template-columns: 1fr; }
+      .detail-grid { grid-template-columns: 1fr 1fr; }
+      .table-card { overflow-x: auto; }
+      table { min-width: 680px; }
+      .mobile-nav { position: fixed; left: 10px; right: 10px; bottom: 10px; z-index: 50; display: grid; grid-template-columns: repeat(4, 1fr); background: rgba(23,79,65,.97); border-radius: 16px; padding: 6px; box-shadow: var(--shadow); }
+      .mobile-nav .nav-btn { padding: 8px 5px; font-size: 10px; display: grid; place-items: center; gap: 2px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">⌁</div><div><strong>A12 Citizen Science</strong><span>Environmental Observation System</span></div></div>
+      <nav class="nav" aria-label="Main navigation">
+        <button class="nav-btn active" data-view="explore" data-roles="guest,participant,moderator,admin"><span class="icon">⌖</span>Public Map</button>
+        <button class="nav-btn" data-view="dashboard" data-roles="guest,participant,moderator,admin"><span class="icon">▥</span>Data Dashboard</button>
+        <button class="nav-btn" data-view="submit" data-roles="participant"><span class="icon">＋</span>Submit observation</button>
+        <button class="nav-btn" data-view="mine" data-roles="participant"><span class="icon">▤</span>My Records</button>
+        <button class="nav-btn" data-view="review" data-roles="moderator"><span class="icon">✓</span>Moderator Workspace</button>
+        <button class="nav-btn" data-view="admin" data-roles="admin"><span class="icon">⚙</span>Admin Workspace</button>
+      </nav>
+      <div class="side-note"><strong>Responsive web prototype</strong>ALA BioCollect workflow with iNaturalist-style public privacy controls. Walking SA informs Region and Park categories.</div>
+    </aside>
+
+    <div class="shell">
+      <header class="topbar">
+        <div><div class="crumb">A12 Citizen Science Prototype</div><strong id="top-title">Explore approved observations</strong></div>
+        <div class="top-actions">
+          <div class="role-switch" aria-label="Switch prototype role"><button class="role-btn active" data-role="guest">Guest</button><button class="role-btn" data-role="participant">Participant</button><button class="role-btn" data-role="moderator">Moderator</button><button class="role-btn" data-role="admin">Admin</button></div>
+          <button class="btn btn-secondary" id="header-signin" data-view="signin">Sign in</button>
+          <button class="btn btn-primary" id="header-create" data-view="signin" data-auth-target="create">Create account</button>
+          <div class="avatar" id="avatar" aria-label="Current profile">GU</div>
+        </div>
+      </header>
+
+      <main>
+        <section class="view active" id="view-explore">
+          <div class="page-head">
+            <div><div class="eyebrow">Approved community records</div><h1>Explore approved observations</h1><p class="sub">Browse community records while sensitive locations remain protected.</p></div>
+            <div><button class="btn btn-secondary" data-view="dashboard">View charts</button> <button class="btn btn-primary" id="public-submit">＋ Submit observation</button></div>
+          </div>
+
+          <div class="explore-grid">
+            <article class="card map-card">
+              <div class="filterbar">
+                <select class="select" id="filter-region" aria-label="Filter by region"><option value="all">All regions</option><option>Greater Adelaide</option><option>Adelaide Hills</option><option>Fleurieu Peninsula</option><option>Murraylands</option></select>
+                <button class="select" id="park-selector-btn" type="button">All parks and areas ▾</button>
+                <select class="select" id="filter-category" aria-label="Filter by category"><option value="all">All categories</option><option>Wildlife</option><option>Vegetation</option><option>Water</option><option>Pollution</option></select>
+                <select class="select" id="filter-date" aria-label="Filter by date"><option>Last 30 days</option><option>Last 7 days</option><option>This year</option></select>
+                <button class="btn btn-primary" id="apply-filters">Apply filters</button><button class="btn btn-secondary" id="clear-filters">Clear</button>
+                <button class="btn btn-secondary" id="export-csv">⇩ Export CSV</button>
+              </div>
+              <div class="map" aria-label="Prototype map of approved observations">
+                <span class="map-label" style="left:43%;top:15%">ADELAIDE</span><span class="map-label" style="left:15%;top:62%">MITCHAM</span><span class="map-label" style="right:10%;top:55%">BURNSIDE</span>
+                <button class="marker" data-id="1" data-category="Wildlife" style="left:48%;top:42%" aria-label="Superb fairy-wren observation"><span>SF</span></button>
+                <button class="marker" data-id="2" data-category="Vegetation" style="left:29%;top:67%" aria-label="Native orchid observation"><span>🌿</span></button>
+                <button class="marker" data-id="3" data-category="Water" style="left:69%;top:61%" aria-label="Creek observation"><span>💧</span></button>
+                <button class="marker" data-id="4" data-category="Wildlife" style="left:61%;top:28%" aria-label="Rainbow lorikeet observation"><span>🦜</span></button>
+                <div class="map-note"><span>◉</span><div><strong>Location privacy is on.</strong> Sensitive records show “Approximate region only”; filters cannot reveal exact coordinates.</div></div>
+              </div>
+            </article>
+
+            <div class="right-stack">
+              <div class="stats">
+                <article class="card stat"><b id="approved-count">128</b><span>Approved records</span></article>
+                <article class="card stat"><b>4</b><span>Observation categories</span></article>
+              </div>
+              <article class="card records-card">
+                <div class="panel-head"><h2>Approved records</h2><span class="tag">Reviewed</span></div>
+                <div class="records" id="recent-records"></div>
+              </article>
+              <article class="card">
+                <div class="panel-head"><h2>Records this week</h2><span class="tag">+18%</span></div>
+                <div class="mini-chart" aria-label="Weekly observation bar chart">
+                  <div class="bar" data-label="M" style="height:36%"></div><div class="bar" data-label="T" style="height:58%"></div><div class="bar" data-label="W" style="height:45%"></div><div class="bar" data-label="T" style="height:76%"></div><div class="bar" data-label="F" style="height:63%"></div><div class="bar" data-label="S" style="height:88%"></div><div class="bar" data-label="S" style="height:70%"></div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="view-dashboard">
+          <div class="page-head"><div><div class="eyebrow">Approved records only</div><h1>Public Data Dashboard</h1><p class="sub">Region, Park / area, Category and Date use the same public-data rules as the map and CSV.</p></div><button class="btn btn-primary" id="dashboard-export">⇩ Download CSV</button></div>
+          <div class="dashboard-grid">
+            <article class="card metric"><span class="sub">Approved records</span><b id="dashboard-total">128</b><small class="sub">Internal statuses excluded</small></article>
+            <article class="card metric"><span class="sub">Region</span><b id="dashboard-region" style="font-size:20px">All regions</b><small class="sub">Walking SA classification reference</small></article>
+            <article class="card metric"><span class="sub">Park / area</span><b id="dashboard-park" style="font-size:20px">All parks and areas</b><small class="sub">Client coverage to be confirmed</small></article>
+            <article class="card chart-card"><h2>Category distribution</h2><div class="category-chart"><div class="chart-column"><b>46</b><i style="height:82%"></i><span>Wildlife</span></div><div class="chart-column"><b>35</b><i style="height:62%"></i><span>Vegetation</span></div><div class="chart-column"><b>29</b><i style="height:52%"></i><span>Water</span></div><div class="chart-column"><b>18</b><i style="height:32%"></i><span>Pollution</span></div></div></article>
+            <article class="card chart-card wide"><h2>Weekly trend</h2><div class="trend-chart"><div class="chart-column"><i style="height:35%"></i><span>Mon</span></div><div class="chart-column"><i style="height:56%"></i><span>Tue</span></div><div class="chart-column"><i style="height:44%"></i><span>Wed</span></div><div class="chart-column"><i style="height:76%"></i><span>Thu</span></div><div class="chart-column"><i style="height:64%"></i><span>Fri</span></div><div class="chart-column"><i style="height:88%"></i><span>Sat</span></div><div class="chart-column"><i style="height:70%"></i><span>Sun</span></div></div></article>
+          </div><p class="policy-note" style="margin-top:16px">Export includes approved public fields only. Restricted locations are excluded.</p>
+        </section>
+
+        <section class="view" id="view-park">
+          <div class="auth-wrap"><article class="card auth-card"><div class="modal-top"><div><div class="eyebrow">16 Park Area Selector</div><h1 style="font-size:27px">Choose Park / area</h1><p class="sub">South Australia classifications informed by Walking SA.</p></div><button class="close" id="park-close" aria-label="Back to Public Map">×</button></div><div class="selector-list"><button class="selector-option" data-park="All parks and areas"><strong>All parks and areas</strong><small class="sub" style="display:block">Show every approved public record</small></button><button class="selector-option" data-park="Belair National Park"><strong>Belair National Park</strong><small class="sub" style="display:block">Adelaide Hills</small></button><button class="selector-option" data-park="Adelaide Park Lands"><strong>Adelaide Park Lands</strong><small class="sub" style="display:block">Greater Adelaide</small></button><button class="selector-option" data-park="Brown Hill Creek"><strong>Brown Hill Creek</strong><small class="sub" style="display:block">Adelaide Hills</small></button><button class="selector-option" data-park="Linear Park"><strong>Linear Park</strong><small class="sub" style="display:block">Greater Adelaide</small></button></div></article></div>
+        </section>
+
+        <section class="view" id="view-signin">
+          <div class="auth-wrap"><article class="card auth-card"><div class="eyebrow">Role Access</div><h1 style="font-size:27px">Sign in or create an account</h1><p class="sub">Guest access remains available for public records.</p><div class="auth-tabs"><button class="auth-tab active" data-auth="signin">Sign in</button><button class="auth-tab" data-auth="create">Create account</button></div><form class="auth-pane active" id="signin-form" data-auth-pane="signin"><div class="field"><label>Email</label><input class="input" type="email" value="participant@example.org" required></div><div class="field"><label>Password</label><input class="input" type="password" value="prototype" required></div><div class="form-actions"><button type="button" class="btn btn-secondary" data-view="explore">Continue as guest</button><button class="btn btn-primary">Sign in</button></div></form><form class="auth-pane" id="create-form" data-auth-pane="create"><div class="field"><label>Full name</label><input class="input" value="New Participant" required></div><div class="field"><label>Email</label><input class="input" type="email" placeholder="name@example.org" required></div><div class="field"><label>Password</label><input class="input" type="password" minlength="8" value="prototype" required></div><p class="policy-note">New accounts can only become Participant. Moderator and Admin access is assigned by an Admin.</p><button class="btn btn-primary" style="width:100%;margin-top:14px">Create participant account</button></form></article></div>
+        </section>
+
+        <section class="view" id="view-submit">
+          <div class="page-head"><div><div class="eyebrow">Participant journey</div><h1>Submit an observation</h1><p class="sub">Add clear details so a moderator can review the record.</p></div></div>
+          <div class="form-layout">
+            <form class="card form-card" id="observation-form">
+              <div class="steps"><span class="step-pill active">1 Observation</span><span class="step-pill">2 Location & privacy</span><span class="step-pill">3 Review</span></div>
+              <div class="field-grid">
+                <div class="field full"><label>Photo *</label><label class="upload" id="upload-box"><div id="upload-copy"><div style="font-size:32px">▧</div><strong>Choose a photo</strong><small>JPG, PNG or WebP, up to 10 MB</small></div><img class="upload-preview" id="upload-preview" alt="Selected observation preview" /><input id="photo-input" type="file" accept="image/png,image/jpeg,image/webp" required /></label><div class="upload-error" id="upload-error"><strong>Photo could not be accepted.</strong><div id="upload-error-copy">Check the extension, MIME type and file size.</div><button type="button" class="btn btn-secondary" id="choose-another" style="margin-top:8px">Choose another photo</button></div></div>
+                <div class="field"><label for="obs-category">Category *</label><select class="input" id="obs-category" required><option value="">Choose a category</option><option>Wildlife</option><option>Vegetation</option><option>Water</option><option>Pollution</option></select></div>
+                <div class="field"><label for="obs-date">Date observed *</label><input class="input" id="obs-date" type="date" required /></div>
+                <div class="field full"><label for="obs-title">Short title *</label><input class="input" id="obs-title" placeholder="For example: Koala near walking trail" required /></div>
+                <div class="field full"><label for="obs-notes">What did you notice?</label><textarea class="input" id="obs-notes" placeholder="Add useful details such as number, behaviour or water condition"></textarea></div>
+                <div class="field"><label for="obs-region">Region *</label><select class="input" id="obs-region" required><option>Greater Adelaide</option><option>Adelaide Hills</option><option>Fleurieu Peninsula</option><option>Murraylands</option></select></div>
+                <div class="field"><label for="obs-suburb">Park / area *</label><input class="input" id="obs-suburb" placeholder="Park or reserve" required /></div>
+                <div class="field"><label for="obs-accuracy">Location accuracy</label><select class="input" id="obs-accuracy"><option>General area</option><option>Within 1 kilometre</option><option>Exact location (protected)</option></select></div>
+                <label class="check-row full"><input id="sensitive-check" type="checkbox" /><span><strong>This may be a sensitive location</strong><small>Exact coordinates will be protected and will not appear on the public map.</small></span></label>
+              </div>
+              <div class="form-actions"><button type="button" class="btn btn-secondary" data-go="explore">Cancel</button><button type="submit" class="btn btn-primary">Send for review →</button></div>
+            </form>
+            <aside class="card help-card"><h2>Before you submit</h2><div class="help-list"><div class="help-item"><span class="dot">1</span><div><strong>Add clear evidence</strong><small>Use a useful photo and basic details.</small></div></div><div class="help-item"><span class="dot">2</span><div><strong>Protect the location</strong><small>Flag nests, rare species and private property.</small></div></div><div class="help-item"><span class="dot">3</span><div><strong>Wait for review</strong><small>A moderator may approve, reject or ask a question.</small></div></div></div><div class="ai-box"><strong>BioCLIP suggestion — optional</strong><p style="margin:7px 0"><span id="ai-suggestion">Add a wildlife or vegetation photo to preview a category suggestion.</span></p><small>This suggestion never approves or publishes a record.</small></div></aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-mine">
+          <div class="page-head"><div><div class="eyebrow">Your contributions</div><h1>My records</h1><p class="sub">Track each record and reply if a moderator needs more information.</p></div><button class="btn btn-primary" data-go="submit">＋ New observation</button></div>
+          <article class="card table-card">
+            <table><thead><tr><th>Observation</th><th>Category</th><th>Submitted</th><th>Public location</th><th>Status</th><th></th></tr></thead><tbody id="my-records"></tbody></table>
+          </article>
+        </section>
+
+        <section class="view" id="view-review">
+          <div class="page-head"><div><span class="staff-label">Private staff view</span><div class="eyebrow">Moderator Workspace</div><h1>Review queue</h1><p class="sub">Check original evidence and exact locations, then record a reasoned decision.</p></div><span class="tag pending" id="queue-count">3 waiting</span></div>
+          <div class="review-layout">
+            <article class="card queue" id="review-queue"></article>
+            <article class="card review-card">
+              <div class="review-cover" id="review-emoji">🐨</div>
+              <div class="review-body">
+                <div class="modal-top"><div><span class="tag pending">Pending review</span><h2 id="review-title" style="margin-top:9px">Koala near walking trail</h2></div><span class="tag" id="review-category">Wildlife</span></div>
+                <p id="review-notes">One koala resting in a gum tree beside the main trail. Photo taken from a safe distance.</p>
+                <div class="detail-grid"><div class="detail"><span>Submitted by</span><strong id="review-author">Mia Chen</strong></div><div class="detail"><span>Date observed</span><strong id="review-date">4 Sep 2026</strong></div><div class="detail"><span>Exact location — staff only</span><strong id="review-location">-35.001, 138.633</strong></div></div>
+                <div class="privacy-banner"><span>◉</span><div><strong>Privacy check recommended</strong><div id="privacy-copy">This wildlife record may need a less exact public location.</div></div></div>
+                <div class="ai-box"><strong>BioCLIP suggestion</strong><p style="margin:7px 0">Koala <b>82%</b> · Common wombat 11% · Brushtail possum 4%</p><small>Advisory only. Confirm or correct the category before approval.</small></div>
+                <div class="field decision-note"><label for="decision-note">Decision note *</label><textarea class="input" id="decision-note" placeholder="Record the reason for the decision"></textarea></div>
+                <div class="flow-panel" id="ask-panel"><h3>Ask for Information</h3><p class="sub">The Participant will see this request in My Records and can reply.</p><div class="review-actions"><button class="btn btn-primary" id="send-question">Send request</button><button class="btn btn-secondary flow-cancel">Cancel</button></div></div>
+                <div class="flow-panel" id="reject-panel"><h3>Reject Observation</h3><p class="sub">The rejection reason remains private and is saved to audit history.</p><div class="review-actions"><button class="btn btn-danger" id="confirm-reject">Confirm rejection</button><button class="btn btn-secondary flow-cancel">Cancel</button></div></div>
+                <div class="flow-panel" id="duplicate-panel"><h3>Possible duplicate review</h3><div class="compare-grid"><div class="compare-item"><span class="tag pending">Current record</span><h3 style="margin-top:8px" id="duplicate-current">Current submission</h3><p class="sub">Original image, time and exact location available.</p></div><div class="compare-item"><span class="tag">Existing record</span><h3 style="margin-top:8px">Superb fairy-wren near creek</h3><p class="sub">Same area, similar image, 18 minutes earlier.</p></div></div><div class="review-actions"><button class="btn btn-danger" id="mark-duplicate">Mark duplicate</button><button class="btn btn-secondary" id="keep-separate">Keep separate</button><button class="btn btn-secondary flow-cancel">Cancel</button></div></div>
+                <div class="review-actions" id="review-main-actions"><button class="btn btn-primary" id="approve-btn">✓ Approve with protected location</button><button class="btn btn-secondary" id="clarify-btn">? Ask for information</button><button class="btn btn-danger" id="reject-btn">Reject</button><button class="btn btn-secondary" id="duplicate-btn">Compare duplicate</button></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="view-admin">
+          <div class="page-head"><div><span class="staff-label">Private administration</span><div class="eyebrow">Admin Workspace</div><h1>Accounts and access</h1><p class="sub">Admin manages roles and access. Moderator manages observation review.</p></div></div>
+          <div class="admin-layout"><article class="card table-card"><div class="panel-head"><h2>User accounts</h2><span class="tag">Least privilege</span></div><table><thead><tr><th>User</th><th>Email</th><th>Role</th><th>Access</th></tr></thead><tbody id="admin-users"><tr><td>Lijun Ouyang</td><td>lijun@example.org</td><td><select class="select user-role"><option>Participant</option><option>Moderator</option><option selected>Admin</option></select></td><td><span class="tag">Active</span></td></tr><tr><td>Mia Chen</td><td>mia@example.org</td><td><select class="select user-role"><option selected>Participant</option><option>Moderator</option><option>Admin</option></select></td><td><span class="tag">Active</span></td></tr><tr><td>Noah Lee</td><td>noah@example.org</td><td><select class="select user-role"><option>Participant</option><option selected>Moderator</option><option>Admin</option></select></td><td><span class="tag">Active</span></td></tr></tbody></table></article><article class="card"><div class="panel-head"><h2>Audit log</h2><span class="tag">Recorded</span></div><div class="audit-list" id="audit-list"><div class="audit-row"><strong>Admin role assigned</strong><small>System owner · 5 Sep 2026</small></div><div class="audit-row"><strong>Observation approved with protected location</strong><small>Noah Lee · 4 Sep 2026</small></div><div class="audit-row"><strong>Participant account created</strong><small>System · 4 Sep 2026</small></div></div></article></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <button class="nav-btn active" data-view="explore" data-roles="guest,participant,moderator,admin"><span class="icon">⌖</span>Map</button><button class="nav-btn" data-view="dashboard" data-roles="guest,participant,moderator,admin"><span class="icon">▥</span>Data</button><button class="nav-btn" data-view="submit" data-roles="participant"><span class="icon">＋</span>Submit</button><button class="nav-btn" data-view="mine" data-roles="participant"><span class="icon">▤</span>Mine</button><button class="nav-btn" data-view="review" data-roles="moderator"><span class="icon">✓</span>Review</button><button class="nav-btn" data-view="admin" data-roles="admin"><span class="icon">⚙</span>Admin</button>
+  </nav>
+
+  <div class="modal" id="detail-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><article class="modal-card"><div class="modal-media" id="modal-emoji">SF</div><div class="modal-content"><div class="modal-top"><div><span class="tag">Approved</span><h2 id="modal-title" style="margin-top:8px">Superb fairy-wren</h2></div><button class="close" id="modal-close" aria-label="Close">×</button></div><p id="modal-description"></p><div class="detail-grid"><div class="detail"><span>Category</span><strong id="modal-category"></strong></div><div class="detail"><span>Observed</span><strong id="modal-date"></strong></div><div class="detail"><span>Public location</span><strong id="modal-location"></strong></div></div><div class="privacy-banner"><span>◉</span><div><strong>Approximate region only</strong><div>Location withheld to protect a sensitive species. Exact coordinates and private submitter data are not shown.</div></div></div><button class="btn btn-secondary" id="back-to-map">← Back to public map</button></div></article></div>
+  <div class="modal" id="reply-modal" role="dialog" aria-modal="true"><article class="modal-card"><div class="modal-content"><div class="modal-top"><div><span class="tag info">Needs information</span><h2 style="margin-top:8px">Reply to Moderator</h2></div><button class="close" id="reply-close" aria-label="Close">×</button></div><p class="policy-note">Please confirm whether the plant was inside the reserve boundary and add any identifying details.</p><div class="field" style="margin-top:14px"><label for="reply-text">Your response</label><textarea class="input" id="reply-text" placeholder="Add the requested information"></textarea></div><div class="form-actions"><button class="btn btn-primary" id="send-reply">Send response</button></div></div></article></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const approvedRecords=[
+      {id:1,emoji:'SF',title:'Superb fairy-wren',category:'Wildlife',date:'3 Sep 2026',region:'Greater Adelaide',park:'Adelaide Park Lands',location:'Greater Adelaide region',sensitive:true,description:'A small group of superb fairy-wrens observed near low vegetation.'},
+      {id:2,emoji:'RG',title:'River red gum',category:'Vegetation',date:'2 Sep 2026',region:'Greater Adelaide',park:'Linear Park',location:'Linear Park',sensitive:false,description:'A mature river red gum beside the shared path.'},
+      {id:3,emoji:'CC',title:'Creek condition',category:'Water',date:'1 Sep 2026',region:'Adelaide Hills',park:'Brown Hill Creek',location:'Brown Hill Creek',sensitive:false,description:'Clear creek flow observed after light rainfall.'},
+      {id:4,emoji:'KO',title:'Koala resting in gum tree',category:'Wildlife',date:'30 Aug 2026',region:'Adelaide Hills',park:'Belair National Park',location:'Belair National Park',sensitive:true,description:'Koala photographed from a safe distance.'}
+    ];
+    const myRecords=[
+      {emoji:'KO',title:'Koala resting in gum tree',category:'Wildlife',date:'4 Sep 2026',location:'Belair National Park',status:'Approved'},
+      {emoji:'FB',title:'Foam beside creek bank',category:'Pollution',date:'3 Sep 2026',location:'St Peters area',status:'Pending'},
+      {emoji:'UP',title:'Unknown roadside plant',category:'Vegetation',date:'29 Aug 2026',location:'Unley area',status:'Needs information'},
+      {emoji:'BW',title:'Blurry water sample',category:'Water',date:'22 Aug 2026',location:'Murraylands',status:'Rejected'}
+    ];
+    let reviewRecords=[
+      {emoji:'SF',title:'Superb fairy-wren',category:'Wildlife',author:'Mia Chen',date:'5 Sep 2026',location:'-34.9211, 138.6010',notes:'Three birds beside low vegetation. Original photo retained for staff review.',status:'Possible copy'},
+      {emoji:'RG',title:'River red gum',category:'Vegetation',author:'Noah Lee',date:'4 Sep 2026',location:'-34.8750, 138.6422',notes:'Large tree beside Linear Park path. Location note needs clarification.',status:'Needs info'},
+      {emoji:'CC',title:'Creek condition',category:'Water',author:'Ava Singh',date:'4 Sep 2026',location:'-35.0120, 138.6328',notes:'Water running clear after rain. No visible litter.',status:'New'}
+    ];
+    let currentReview=0,currentRole='guest',selectedPark='All parks and areas',photoValid=false;
+    const titles={explore:'Explore approved observations',dashboard:'Public Data Dashboard',park:'Park / area selector',signin:'Role Access',submit:'Submit an observation',mine:'My Records',review:'Moderator Workspace — Private staff view',admin:'Admin Workspace'};
+    const home={guest:'explore',participant:'mine',moderator:'review',admin:'admin'};
+    const showToast=message=>{const t=document.getElementById('toast');t.textContent=message;t.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove('show'),2600)};
+    function canAccess(name){if(['explore','dashboard','park','signin'].includes(name))return true;if(['submit','mine'].includes(name))return currentRole==='participant';if(name==='review')return currentRole==='moderator';if(name==='admin')return currentRole==='admin';return false}
+    function showView(name,authTarget){if(!canAccess(name)){showView(currentRole==='guest'?'signin':home[currentRole]);showToast(currentRole==='guest'?'Sign in as a Participant to continue.':'This role cannot access that workspace.');return}document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${name}`));document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===name));document.getElementById('top-title').textContent=titles[name];if(name==='signin'&&authTarget)setAuth(authTarget);window.scrollTo({top:0,behavior:'smooth'})}
+    function setRole(role,announce=true){currentRole=role;document.querySelectorAll('.role-btn').forEach(b=>b.classList.toggle('active',b.dataset.role===role));document.querySelectorAll('[data-roles]').forEach(el=>el.style.display=el.dataset.roles.split(',').includes(role)?'':'none');const guest=role==='guest';document.getElementById('header-signin').style.display=guest?'inline-flex':'none';document.getElementById('header-create').style.display=guest?'inline-flex':'none';document.getElementById('avatar').textContent=role==='participant'?'PA':role==='moderator'?'MO':role==='admin'?'AD':'GU';showView(home[role]);if(announce)showToast(`${role[0].toUpperCase()+role.slice(1)} view is active.`)}
+    document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view,b.dataset.authTarget)));
+    document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.go)));
+    document.querySelectorAll('.role-btn').forEach(b=>b.addEventListener('click',()=>setRole(b.dataset.role)));
+    document.getElementById('public-submit').onclick=()=>currentRole==='participant'?showView('submit'):showView('signin','create');
+
+    function setAuth(target){document.querySelectorAll('[data-auth]').forEach(b=>b.classList.toggle('active',b.dataset.auth===target));document.querySelectorAll('[data-auth-pane]').forEach(p=>p.classList.toggle('active',p.dataset.authPane===target))}
+    document.querySelectorAll('[data-auth]').forEach(b=>b.onclick=()=>setAuth(b.dataset.auth));
+    document.getElementById('signin-form').onsubmit=e=>{e.preventDefault();setRole('participant',false);showToast('Signed in as Participant.')};
+    document.getElementById('create-form').onsubmit=e=>{e.preventDefault();setRole('participant',false);showView('submit');showToast('Participant account created. Add your first observation.')};
+
+    document.getElementById('park-selector-btn').onclick=()=>showView('park');document.getElementById('park-close').onclick=()=>showView('explore');
+    document.querySelectorAll('[data-park]').forEach(b=>b.onclick=()=>{selectedPark=b.dataset.park;document.getElementById('park-selector-btn').textContent=selectedPark+' ▾';document.getElementById('dashboard-park').textContent=selectedPark;showView('explore');showToast('Park / area selection applied to the demonstration.')});
+    document.getElementById('apply-filters').onclick=()=>{const region=document.getElementById('filter-region').value,category=document.getElementById('filter-category').value;document.getElementById('dashboard-region').textContent=region==='all'?'All regions':region;renderApproved(category,region);showToast('Map, approved count, charts and CSV use the selected filters.')};
+    document.getElementById('clear-filters').onclick=()=>{document.getElementById('filter-region').value='all';document.getElementById('filter-category').value='all';document.getElementById('filter-date').selectedIndex=0;selectedPark='All parks and areas';document.getElementById('park-selector-btn').textContent=selectedPark+' ▾';document.getElementById('dashboard-region').textContent='All regions';document.getElementById('dashboard-park').textContent=selectedPark;renderApproved();showToast('Filters cleared.')};
+    function visibleRecords(){const category=document.getElementById('filter-category').value,region=document.getElementById('filter-region').value;return approvedRecords.filter(r=>(category==='all'||r.category===category)&&(region==='all'||r.region===region)&&(selectedPark==='All parks and areas'||r.park===selectedPark))}
+    function renderApproved(category='all',region='all'){const rows=approvedRecords.filter(r=>(category==='all'||r.category===category)&&(region==='all'||r.region===region)&&(selectedPark==='All parks and areas'||r.park===selectedPark));document.getElementById('recent-records').innerHTML=rows.map(r=>`<button class="record-row" data-record="${r.id}"><span class="thumb">${r.emoji}</span><span><strong>${r.title}</strong><small>${r.date} · ${r.location}</small></span><span class="tag">${r.category}</span></button>`).join('')||'<p class="sub" style="padding:14px">No approved records match this demonstration.</p>';document.getElementById('approved-count').textContent=rows.length===approvedRecords.length?'128':rows.length*16;document.getElementById('dashboard-total').textContent=document.getElementById('approved-count').textContent;document.querySelectorAll('.marker').forEach(m=>{const r=approvedRecords.find(x=>x.id===+m.dataset.id);m.style.display=rows.includes(r)?'block':'none'});document.querySelectorAll('[data-record]').forEach(b=>b.onclick=()=>openRecord(+b.dataset.record))}
+    function openRecord(id){const r=approvedRecords.find(x=>x.id===id);if(!r)return;['title','description','category','date','location'].forEach(k=>document.getElementById(`modal-${k}`).textContent=r[k]);document.getElementById('modal-emoji').textContent=r.emoji;document.getElementById('detail-modal').classList.add('open')}
+    document.querySelectorAll('.marker').forEach(m=>m.onclick=()=>openRecord(+m.dataset.id));
+    document.getElementById('modal-close').onclick=document.getElementById('back-to-map').onclick=()=>{document.getElementById('detail-modal').classList.remove('open');showView('explore')};
+    document.getElementById('detail-modal').onclick=e=>{if(e.target.id==='detail-modal')e.currentTarget.classList.remove('open')};
+    function exportCsv(){const rows=visibleRecords(),csv=['observation_name,category,date,region,park_or_area,public_location,approved_status',...rows.map(r=>`"${r.title}",${r.category},${r.date},"${r.region}","${r.park}","${r.location}",Approved`)].join('\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='a12-approved-public-records.csv';a.click();showToast('Approved public fields exported. Restricted locations were excluded.')}
+    document.getElementById('export-csv').onclick=exportCsv;document.getElementById('dashboard-export').onclick=exportCsv;
+
+    function renderMine(){document.getElementById('my-records').innerHTML=myRecords.map((r,i)=>`<tr><td><div class="table-title"><span class="thumb">${r.emoji}</span><strong>${r.title}</strong></div></td><td>${r.category}</td><td>${r.date}</td><td>${r.location}</td><td><span class="tag ${r.status==='Pending'?'pending':r.status==='Needs information'?'info':r.status==='Rejected'?'rejected':''}">${r.status}</span></td><td>${r.status==='Needs information'?`<button class="btn btn-secondary" data-reply="${i}">Reply</button>`:'<button class="btn btn-secondary">View</button>'}</td></tr>`).join('');document.querySelectorAll('[data-reply]').forEach(b=>b.onclick=()=>document.getElementById('reply-modal').classList.add('open'))}
+    document.getElementById('reply-close').onclick=()=>document.getElementById('reply-modal').classList.remove('open');document.getElementById('send-reply').onclick=()=>{if(!document.getElementById('reply-text').value.trim()){showToast('Add the requested information first.');return}const r=myRecords.find(x=>x.status==='Needs information');r.status='Pending';renderMine();document.getElementById('reply-modal').classList.remove('open');showToast('Response sent. The record returned to the Moderator queue.')};
+    const photoInput=document.getElementById('photo-input');function resetPhoto(){photoInput.value='';photoValid=false;document.getElementById('upload-preview').style.display='none';document.getElementById('upload-copy').style.display='block';document.getElementById('upload-error').classList.remove('open')}photoInput.onchange=e=>{const f=e.target.files[0];if(!f)return;const ext=f.name.split('.').pop().toLowerCase(),validExt=['jpg','jpeg','png','webp'].includes(ext),validMime=['image/jpeg','image/png','image/webp'].includes(f.type),validSize=f.size<=10*1024*1024;if(!validExt||!validMime||!validSize){photoValid=false;document.getElementById('upload-error-copy').textContent=validSize?'Extension or MIME type is not an accepted image format.':'File is larger than 10 MB.';document.getElementById('upload-error').classList.add('open');return}photoValid=true;document.getElementById('upload-error').classList.remove('open');const img=document.getElementById('upload-preview');img.src=URL.createObjectURL(f);img.style.display='block';document.getElementById('upload-copy').style.display='none';document.getElementById('ai-suggestion').innerHTML='<strong>Possible category: Wildlife</strong><br>Advisory only. A Moderator makes the final decision.'};document.getElementById('choose-another').onclick=()=>{resetPhoto();photoInput.click()};
+    document.getElementById('observation-form').onsubmit=e=>{e.preventDefault();if(!photoValid){document.getElementById('upload-error-copy').textContent='Choose a valid image before submitting.';document.getElementById('upload-error').classList.add('open');return}const category=document.getElementById('obs-category').value,title=document.getElementById('obs-title').value;myRecords.unshift({emoji:title.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase(),title,category,date:document.getElementById('obs-date').value||'Today',location:document.getElementById('obs-suburb').value,status:'Pending'});renderMine();e.target.reset();resetPhoto();showView('mine');showToast('Observation submitted for human moderation.')};
+
+    function renderQueue(){document.getElementById('queue-count').textContent=`${reviewRecords.length} waiting`;document.getElementById('review-queue').innerHTML=reviewRecords.length?reviewRecords.map((r,i)=>`<button class="queue-item ${i===currentReview?'active':''}" data-review="${i}"><span class="thumb">${r.emoji}</span><span><strong>${r.title}</strong><small>${r.category} · ${r.status}</small></span></button>`).join(''):'<div class="sub" style="padding:28px;text-align:center"><strong>Queue is clear</strong><p>No records are waiting for review.</p></div>';document.querySelectorAll('[data-review]').forEach(b=>b.onclick=()=>{currentReview=+b.dataset.review;renderQueue();renderReview()})}
+    function closeFlows(){document.querySelectorAll('.flow-panel').forEach(p=>p.classList.remove('open'));document.getElementById('review-main-actions').style.display='flex'}
+    function renderReview(){const r=reviewRecords[currentReview],card=document.querySelector('.review-card');if(!r){card.style.display='none';return}card.style.display='block';document.getElementById('review-emoji').textContent=r.emoji;document.getElementById('review-title').textContent=r.title;document.getElementById('review-category').textContent=r.category;document.getElementById('review-notes').textContent=r.notes;document.getElementById('review-author').textContent=r.author;document.getElementById('review-date').textContent=r.date;document.getElementById('review-location').textContent=r.location;document.getElementById('duplicate-current').textContent=r.title;document.getElementById('privacy-copy').textContent=r.category==='Wildlife'?'Publish an approximate region only. Exact coordinates stay restricted.':'Confirm the public location does not expose private or sensitive information.';document.getElementById('decision-note').value='';closeFlows()}
+    function noteRequired(){const note=document.getElementById('decision-note').value.trim();if(!note)showToast('Add a decision note first.');return note}
+    function decide(action){const note=noteRequired();if(!note||!reviewRecords.length)return;const title=reviewRecords[currentReview].title;reviewRecords.splice(currentReview,1);currentReview=0;renderQueue();renderReview();addAudit(`${title}: ${action}. ${note}`);showToast(`${action}. Decision saved to audit history.`)}
+    function openFlow(id){if(!noteRequired())return;closeFlows();document.getElementById(id).classList.add('open');document.getElementById('review-main-actions').style.display='none'}
+    document.getElementById('approve-btn').onclick=()=>decide('Approved with protected location');document.getElementById('clarify-btn').onclick=()=>openFlow('ask-panel');document.getElementById('reject-btn').onclick=()=>openFlow('reject-panel');document.getElementById('duplicate-btn').onclick=()=>openFlow('duplicate-panel');document.querySelectorAll('.flow-cancel').forEach(b=>b.onclick=closeFlows);document.getElementById('send-question').onclick=()=>decide('Information requested');document.getElementById('confirm-reject').onclick=()=>decide('Rejected');document.getElementById('mark-duplicate').onclick=()=>decide('Marked duplicate');document.getElementById('keep-separate').onclick=()=>{const note=noteRequired();if(!note)return;reviewRecords[currentReview].status='New';addAudit(`${reviewRecords[currentReview].title}: Kept separate. ${note}`);closeFlows();renderQueue();showToast('Kept separate. Returned to Moderator Workspace.')};
+    function addAudit(text){const row=document.createElement('div');row.className='audit-row';row.innerHTML=`<strong>${text}</strong><small>Current staff user · Now</small>`;document.getElementById('audit-list').prepend(row)}document.querySelectorAll('.user-role').forEach(s=>s.onchange=()=>{addAudit(`Role changed to ${s.value}`);showToast('Role and access permissions updated.')});
+    document.getElementById('obs-date').valueAsDate=new Date();renderApproved();renderMine();renderQueue();renderReview();setRole('guest',false);
+    const previewParams=new URLSearchParams(location.search),previewRole=previewParams.get('role'),previewView=previewParams.get('view');
+    if(previewRole&&['guest','participant','moderator','admin'].includes(previewRole))setRole(previewRole,false);
+    if(previewView&&titles[previewView])showView(previewView,previewParams.get('auth')||undefined);
+    if(previewParams.get('detail')==='1')openRecord(1);
+    if(previewParams.get('reply')==='1')document.getElementById('reply-modal').classList.add('open');
+    if(previewParams.get('flow')){document.getElementById('decision-note').value='Decision reason entered by moderator.';openFlow(previewParams.get('flow')+'-panel');}
+  </script>
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+</body>
+</html>
